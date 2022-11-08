@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="Assignment1Flow" doc:id="2ba0219a-5086-4df7-b68e-d290ea53f73d" >
+		<http:listener doc:name="Listener" doc:id="277e0d9a-551f-4c8c-8d74-1cabb56aa0c2" config-ref="HTTP_Listener_config" path="/Assignment1"/>
+		<logger level="INFO" doc:name="Logger" doc:id="b1d36735-39ce-46d3-a8a6-cd91ca317684" message='"Received input data is:" #[payload]'/>
+		<set-variable value="#[payload.quiz.sport.q1]" doc:name="Set Variable" doc:id="75637788-80e6-4b70-9cfb-d3b229ac12f6" variableName="q1"/>
+		<ee:transform doc:name="Transform Message" doc:id="031cc8fd-e3a0-4480-8bda-d19f5040a341" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"question":vars.q1.question,
+	"answer":vars.q1.options.answer
+}
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="b2301a81-b020-42f8-aae1-ebf97d552255" message='"required Response is:" #[payload]'/>
+	</flow>
+</mule>

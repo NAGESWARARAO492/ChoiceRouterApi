@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="8ed3247a-f1a6-42d9-839a-1a03c00c2bb9" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="choiceRouterFlow" doc:id="4cedc600-dcb5-4a5e-8d8b-4c78814f74c7" >
+		<http:listener doc:name="Listener" doc:id="4a9bb930-ee85-40ad-a622-7a79d6960d70" config-ref="HTTP_Listener_config" path="/choiceRouter"/>
+		<logger level="INFO" doc:name="Logger" doc:id="3f957e66-f531-410b-8f28-38e9be857f7c" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="aabebf56-df7b-4242-9616-4966accbf1c5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"add":payload.colleges.marks1 + payload.inst.marks2]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="87ab0a1a-0e51-483a-b353-576d01a63791" message="#[payload]"/>
+		<choice doc:name="Choice" doc:id="18372258-dd62-40a5-9344-922043396c95" >
+			<when expression="#[(payload.add)&gt;60]">
+				<ee:transform doc:name="Transform Message" doc:id="74032304-eb19-47b3-ae53-eba62d3917a8" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	result:payload.add,
+	message:"greater than 60 "
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="#[((payload.add)&gt;40 and (payload.add)&lt;50)]">
+				<ee:transform doc:name="Transform Message" doc:id="71cac4f2-d4d8-48c4-8737-3957c430d464" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	result:payload.add,
+	message:"greater than 40 and less than 50 "
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="#[((payload.add)&gt;=20 or (payload.add)&lt;30)]">
+				<ee:transform doc:name="Transform Message" doc:id="bda77f5d-ff78-4e09-baa6-64677ac545c4" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	result:payload.add,
+	message:"greater than or equal to 20 or less than 30 "
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="5b90cf36-ea87-481c-a437-5aaa1950ce60" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"none of conditions satisfied" ]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="b8ea6d0e-96f2-4a39-925a-fbf8bbe4aa35" message="#[payload]"/>
+	
+</flow>
+
+</mule>
